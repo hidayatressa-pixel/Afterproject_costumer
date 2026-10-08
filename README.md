@@ -1,20 +1,30 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# After Project Photocopy
 
-# Run and deploy your AI Studio app
+**Digital file receiving system for photocopy and print shops.**
 
-This contains everything you need to run your app locally.
+Customers scan a QR code, upload their files, add a note, and receive a request code. The shop side manages incoming requests, downloads files, updates print status, and displays the upload QR.
 
-View your app in AI Studio: https://ai.studio/apps/48655bad-1028-4fd6-b344-4ed236ed3baf
+## Core flow
 
-## Run Locally
+Customer → Scan QR → Upload → Send → Request code → Operator receives → Print → Complete
 
-**Prerequisites:**  Node.js
+## Run locally
 
+```bash
+npm install
+npm run dev
+```
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+Build:
+
+```bash
+npm run build
+```
+
+## Important architecture note
+
+The current browser data layer uses IndexedDB plus BroadcastChannel. This is reliable for a same-device browser demo, but **it is not a cross-device production backend**. For a real shop deployment, connect `src/lib/db.ts` to a shared API/database so a customer's phone and the operator computer share the same request data and uploaded files.
+
+## Project identity
+
+After Project Photocopy is intentionally positioned as a lightweight digital file receiving workflow for print/copy shops—not a full marketplace.
