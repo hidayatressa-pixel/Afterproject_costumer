@@ -39,9 +39,9 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden border border-blue-100 animate-in fade-in zoom-in-95 duration-200">
-        <div className="h-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-500" />
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/65 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden border border-white/80 animate-in fade-in zoom-in-95 duration-200">
+        <div className="h-2.5 bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500" />
 
         <button
           onClick={onClose}
@@ -51,7 +51,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
         </button>
 
         <div className="p-6 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-700 via-indigo-600 to-sky-500 text-white flex items-center justify-center mx-auto mb-3 shadow-lg shadow-blue-500/25">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 via-violet-600 to-fuchsia-500 text-white flex items-center justify-center mx-auto mb-3 shadow-lg shadow-blue-500/25">
             <Lock className="w-7 h-7" />
           </div>
 
@@ -98,7 +98,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
                     else if (k === '⌫') handleDelete();
                     else handleKeyClick(k);
                   }}
-                  className="h-11 rounded-xl bg-slate-100 hover:bg-blue-100 hover:text-blue-700 active:bg-blue-200 text-sm font-bold text-slate-800 transition-colors flex items-center justify-center"
+                  className="h-11 rounded-xl bg-slate-100/80 hover:bg-indigo-100 hover:text-indigo-700 active:bg-indigo-200 text-sm font-bold text-slate-800 transition-colors flex items-center justify-center"
                 >
                   {k}
                 </button>
@@ -108,7 +108,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
             <div className="flex flex-col gap-2">
               <button
                 type="submit"
-                className="w-full py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-800 text-white text-xs font-black rounded-2xl transition-all shadow-md shadow-blue-500/20 active:scale-95"
+                className="w-full py-3 ap-gradient-button text-white text-xs font-black rounded-2xl transition-all shadow-md shadow-blue-500/20 active:scale-95"
               >
                 MASUK KE DASHBOARD
               </button>
