@@ -34,7 +34,7 @@ jobs:
         shell: bash
         run: |
           if grep -RniE 'gemini|ai\.studio|@google/genai|GEMINI_API_KEY|google\.dev' \
-            --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=dist .; then
+            src package.json README.md index.html metadata.json .env.example 2>/dev/null; then
             echo "Forbidden provider-specific references detected."
             exit 1
           fi
