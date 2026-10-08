@@ -34,6 +34,7 @@ export const CustomerUploadView: React.FC<CustomerUploadViewProps> = ({
   // Form states
   const [customerName, setCustomerName] = useState('');
   const [notes, setNotes] = useState('');
+  const [storageDevice, setStorageDevice] = useState<'direct' | 'flashdisk' | 'cloud_drive'>('direct');
   const [files, setFiles] = useState<UploadedFileItem[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -123,6 +124,7 @@ export const CustomerUploadView: React.FC<CustomerUploadViewProps> = ({
         createdAt: new Date().toISOString(),
         customerName: customerName.trim(),
         files,
+        storageDevice,
         notes: notes.trim() || undefined,
         status: 'pending',
       };
@@ -421,7 +423,36 @@ export const CustomerUploadView: React.FC<CustomerUploadViewProps> = ({
             />
           </div>
 
-          {/* 4. TOMBOL KIRIM BESAR */}
+          {/* 4. TUJUAN FILE */}
+          <div className="bg-white/90 backdrop-blur-xl rounded-3xl p-5 sm:p-6 border border-white/80 shadow-xl shadow-indigo-900/5">
+            <label className="block text-sm font-black text-slate-900 mb-1">
+              Tujuan File
+            </label>
+            <p className="text-xs text-slate-500 mb-3">
+              Pilih bagaimana file akan diproses oleh operator.
+            </p>
+            <div className="grid sm:grid-cols-3 gap-2">
+              {[
+                ['direct', 'Cetak di Toko', 'Langsung diproses untuk cetak'],
+                ['flashdisk', 'Flashdisk', 'File disiapkan untuk media'],
+                ['cloud_drive', 'Simpan Digital', 'Operator menyiapkan file digital'],
+              ].map(([value, label, detail]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setStorageDevice(value as 'direct' | 'flashdisk' | 'cloud_drive')}
+                  className={`text-left rounded-2xl p-3 border transition-all ${storageDevice === value
+                    ? 'border-indigo-500 bg-gradient-to-br from-indigo-50 to-fuchsia-50 shadow-md'
+                    : 'border-slate-200 bg-slate-50/70 hover:border-indigo-200 hover:bg-white'}`}
+                >
+                  <div className="text-xs font-black text-slate-900">{label}</div>
+                  <div className="text-[10px] text-slate-500 mt-1">{detail}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 5. TOMBOL KIRIM BESAR */}
           <div className="pt-2">
             <button
               type="submit"
