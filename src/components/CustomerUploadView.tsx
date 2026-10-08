@@ -163,7 +163,7 @@ export const CustomerUploadView: React.FC<CustomerUploadViewProps> = ({
   // SUCCESS SCREEN: Shown right after submission
   if (submittedRequest) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50/60 via-slate-50 to-indigo-50/40 py-10 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50/70 via-white to-fuchsia-50/60 py-10 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
         <div className="w-full max-w-lg bg-white rounded-3xl p-7 sm:p-10 border border-blue-100 shadow-2xl shadow-blue-500/10 text-center animate-in zoom-in-95 duration-200">
           <div className="w-20 h-20 rounded-3xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/20 mb-5 animate-bounce">
             <CheckCircle2 className="w-12 h-12" />
@@ -224,7 +224,7 @@ export const CustomerUploadView: React.FC<CustomerUploadViewProps> = ({
           <button
             type="button"
             onClick={handleResetForNewUpload}
-            className="w-full inline-flex items-center justify-center gap-2 py-4 px-6 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-800 text-white font-black text-sm rounded-2xl shadow-lg shadow-blue-500/25 active:scale-95 transition-all"
+            className="w-full inline-flex items-center justify-center gap-2 py-4 px-6 ap-gradient-button text-white font-black text-sm rounded-2xl shadow-lg shadow-blue-500/25 active:scale-95 transition-all"
           >
             <RefreshCw className="w-4 h-4" />
             <span>Kirim File Lainnya</span>
@@ -236,9 +236,9 @@ export const CustomerUploadView: React.FC<CustomerUploadViewProps> = ({
 
   // MAIN UPLOAD VIEW (Simple 1-Page Experience)
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50/50 via-slate-50 to-indigo-50/30 pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50/60 via-white to-fuchsia-50/50 pb-20">
       {/* Brand Header */}
-      <div className="bg-white/95 backdrop-blur-md border-b border-blue-100 pt-7 pb-6 px-4 sm:px-6 lg:px-8">
+      <div className="bg-white/70 backdrop-blur-xl border-b border-white/80 pt-7 pb-6 px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl mx-auto text-center">
           <BrandingLockup size="xl" align="center" showTagline={false} />
 
@@ -270,7 +270,7 @@ export const CustomerUploadView: React.FC<CustomerUploadViewProps> = ({
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* 1. NAMA PELANGGAN */}
-          <div className="bg-white rounded-3xl p-5 sm:p-6 border border-blue-200/80 shadow-md shadow-blue-500/5">
+          <div className="bg-white/75 backdrop-blur-xl rounded-3xl p-5 sm:p-6 border border-white/80 shadow-xl shadow-indigo-900/5">
             <label className="block text-sm font-black text-slate-900 mb-1 flex items-center gap-2">
               <User className="w-4 h-4 text-blue-600" />
               <span>Nama Anda *</span>
@@ -336,7 +336,7 @@ export const CustomerUploadView: React.FC<CustomerUploadViewProps> = ({
                 className="hidden"
               />
 
-              <div className="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-500 text-white flex items-center justify-center shadow-lg shadow-blue-500/25 mb-3">
+              <div className="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-tr from-indigo-600 via-violet-600 to-fuchsia-500 text-white flex items-center justify-center shadow-lg shadow-blue-500/25 mb-3">
                 <UploadCloud className="w-7 h-7" />
               </div>
 
@@ -353,7 +353,7 @@ export const CustomerUploadView: React.FC<CustomerUploadViewProps> = ({
                   e.stopPropagation();
                   fileInputRef.current?.click();
                 }}
-                className="mt-4 inline-flex items-center gap-1.5 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md shadow-blue-500/20 transition-all"
+                className="mt-4 inline-flex items-center gap-1.5 px-5 py-2.5 ap-gradient-button text-white text-xs font-bold rounded-xl shadow-md shadow-blue-500/20 transition-all"
               >
                 <UploadCloud className="w-4 h-4" />
                 <span>PILIH DOKUMEN</span>
@@ -475,7 +475,7 @@ export const CustomerUploadView: React.FC<CustomerUploadViewProps> = ({
         </form>
 
         {/* Info Box */}
-        <div className="mt-8 p-4 rounded-2xl bg-white border border-blue-100 text-center text-xs text-slate-500">
+        <div className="mt-8 p-4 rounded-2xl bg-white/65 backdrop-blur-xl border border-white/80 text-center text-xs text-slate-500">
           <span>✨ </span>
           <span className="font-semibold text-slate-700">
             Tanpa perlu nomor WhatsApp toko. File langsung masuk ke layar kasir After Project Photocopy.
