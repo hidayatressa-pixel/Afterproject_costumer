@@ -26,7 +26,7 @@ export const BrandingLockup: React.FC<BrandingLockupProps> = ({
             PHOTOCOPY
           </span>
         </div>
-        <span className="text-[10px] text-slate-500 font-medium tracking-tight">Digital Print File Transfer</span>
+        <span className="text-[10px] text-slate-500 font-medium tracking-tight">Digital File & Print Service</span>
       </div>
     );
   }
@@ -37,7 +37,7 @@ export const BrandingLockup: React.FC<BrandingLockupProps> = ({
         <div className="flex flex-col items-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100/80 border border-blue-200/80 text-blue-700 text-xs font-bold tracking-wider uppercase mb-3 shadow-sm">
             <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
-            Digital Print Kiosk Portal
+            DIGITAL FILE PORTAL
           </div>
           <h1 className="text-4xl md:text-6xl font-black tracking-tight leading-none bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-900 bg-clip-text text-transparent drop-shadow-sm">
             AFTER PROJECT
@@ -46,7 +46,7 @@ export const BrandingLockup: React.FC<BrandingLockupProps> = ({
             PHOTOCOPY
           </span>
           <span className="text-xs md:text-sm font-bold tracking-widest text-slate-600 uppercase mt-2.5 border-y border-blue-200 bg-blue-50/50 py-1.5 px-6 rounded-md">
-            Digital Print File Transfer
+            Digital File & Print Service
           </span>
           {showTagline && (
             <p className="text-base md:text-lg text-slate-700 font-semibold mt-3">
@@ -69,7 +69,7 @@ export const BrandingLockup: React.FC<BrandingLockupProps> = ({
             PHOTOCOPY
           </span>
           <span className="text-xs font-semibold tracking-wider text-slate-500 uppercase mt-1">
-            Digital Print File Transfer
+            Digital File & Print Service
           </span>
           {showTagline && (
             <p className="text-xs text-blue-700 mt-1 font-semibold">
@@ -93,7 +93,7 @@ export const BrandingLockup: React.FC<BrandingLockupProps> = ({
         </span>
       </div>
       <span className="text-[11px] text-slate-500 font-medium tracking-tight mt-0.5">
-        Digital Print File Transfer
+        Digital File & Print Service
       </span>
       {showTagline && (
         <span className="text-[11px] text-blue-600 font-medium mt-0.5">
