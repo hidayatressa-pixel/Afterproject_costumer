@@ -115,7 +115,7 @@ export default function App() {
   }, [soundEnabled]);
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col text-slate-900 selection:bg-blue-600 selection:text-white">
+    <div className="min-h-screen flex flex-col text-slate-900 selection:bg-indigo-600 selection:text-white">
       {/* Header (Hanya tampil di halaman Pelanggan tanpa tombol switch) */}
       {currentView === 'customer' && (
         <Header onOpenTracker={() => setShowTrackerModal(true)} />
@@ -146,7 +146,7 @@ export default function App() {
 
       {/* Footer: Akses Owner/Operator dipusatkan di sini dengan proteksi PIN */}
       {currentView === 'customer' ? (
-        <footer className="bg-white border-t border-slate-200/80 py-5 px-4 sm:px-6 lg:px-8 text-xs text-slate-500 no-print mt-auto">
+        <footer className="bg-white/70 backdrop-blur-xl border-t border-white/80 py-5 px-4 sm:px-6 lg:px-8 text-xs text-slate-500 no-print mt-auto">
           <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <span className="font-extrabold text-blue-900">AFTER PROJECT</span>
@@ -175,12 +175,12 @@ export default function App() {
           </div>
         </footer>
       ) : (
-        <footer className="bg-neutral-900 border-t border-neutral-800 py-3.5 px-4 sm:px-6 lg:px-8 text-xs text-neutral-400 no-print mt-auto">
+        <footer className="bg-slate-950/90 backdrop-blur-xl border-t border-white/10 py-3.5 px-4 sm:px-6 lg:px-8 text-xs text-neutral-400 no-print mt-auto">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-neutral-300 font-medium">
               <span className="text-white font-bold">AFTER PROJECT PHOTOCOPY</span>
               <span className="text-neutral-600">·</span>
-              <span className="text-neutral-400">Mode Operator & Owner</span>
+              <span className="text-neutral-400">Panel Pengelolaan</span>
             </div>
 
             <div className="flex items-center gap-3">
