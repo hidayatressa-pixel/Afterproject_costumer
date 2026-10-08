@@ -3,7 +3,11 @@ name: Extract ZIP
 on:
   push:
     paths:
-      - "*.zip"
+      - ".github/workflows/unzip.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   extract:
@@ -13,24 +17,54 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Find ZIP
+        id: zip
+        shell: bash
+        run: |
+          ZIP_FILE="$(find . -type f -name '*.zip' -not -path './.git/*' | head -n 1)"
+          if [ -z "$ZIP_FILE" ]; then
+            echo "No ZIP file found."
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "ZIP_FILE=$ZIP_FILE" >> "$GITHUB_ENV"
+          echo "found=true" >> "$GITHUB_OUTPUT"
+          echo "Found: $ZIP_FILE"
+
       - name: Extract ZIP
+        if: steps.zip.outputs.found == 'true'
+        shell: bash
         run: |
-          mkdir -p extracted
-          unzip -o *.zip -d extracted
+          TMP_DIR="$(mktemp -d)"
+          unzip -q -o "$ZIP_FILE" -d "$TMP_DIR"
 
-      - name: Remove ZIP
-        run: |
-          rm -f *.zip
+          echo "ZIP contents:"
+          find "$TMP_DIR" -maxdepth 2 -print
 
-      - name: Move extracted files
-        run: |
-          cp -r extracted/* .
-          rm -rf extracted
+          TOP_LEVEL_COUNT="$(find "$TMP_DIR" -mindepth 1 -maxdepth 1 | wc -l | tr -d ' ')"
 
-      - name: Commit changes
+          if [ "$TOP_LEVEL_COUNT" = "1" ] && [ -d "$(find "$TMP_DIR" -mindepth 1 -maxdepth 1 -type d | head -n 1)" ]; then
+            SOURCE_DIR="$(find "$TMP_DIR" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
+          else
+            SOURCE_DIR="$TMP_DIR"
+          fi
+
+          # Copy the extracted project into repository root, including dotfiles.
+          cp -a "$SOURCE_DIR"/. .
+
+          rm -rf "$TMP_DIR"
+          rm -f "$ZIP_FILE"
+
+      - name: Commit extracted project
+        if: steps.zip.outputs.found == 'true'
+        shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .
-          git diff --cached --quiet || git commit -m "Extract uploaded ZIP"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nothing to commit."
+            exit 0
+          fi
+          git commit -m "Extract uploaded project ZIP"
           git push
