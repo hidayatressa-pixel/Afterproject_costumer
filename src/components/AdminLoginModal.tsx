@@ -18,11 +18,11 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const effectivePin = correctPin || '1234';
-    if (pin.trim() === effectivePin || pin.trim() === '1234' || pin.trim() === 'admin') {
+    const effectivePin = correctPin.trim();
+    if (effectivePin && pin.trim() === effectivePin) {
       onSuccess();
     } else {
-      setError(`PIN salah. Silakan masukkan PIN yang benar (Default: ${effectivePin}).`);
+      setError('PIN salah. Silakan coba lagi.');
       setPin('');
     }
   };
@@ -58,10 +58,10 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
           <BrandingLockup size="sm" align="center" showTagline={false} />
 
           <h3 className="text-base font-black text-slate-900 mt-3">
-            Login Operator / Kasir
+            Akses Operator
           </h3>
           <p className="text-xs text-slate-500 mt-0.5">
-            Masukkan PIN Operator untuk mengelola antrian cetak.
+            Masukkan PIN untuk membuka panel pengelolaan file dan pesanan.
           </p>
 
           <form onSubmit={handleSubmit} className="mt-5">
