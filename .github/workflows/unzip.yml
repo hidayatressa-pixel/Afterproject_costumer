@@ -3,7 +3,7 @@ name: Extract ZIP
 on:
   push:
     paths:
-      - ".github/workflows/unzip.yml"
+      - "**/*.zip"
   workflow_dispatch:
 
 permissions:
