@@ -1,6 +1,10 @@
 {
-  "name": "After Project Photocopy - Digital Print File Transfer",
+  "name": "After Project Photocopy",
   "description": "Sistem pengiriman file digital customer ke toko fotocopy dan percetakan tanpa WhatsApp. Scan QR, upload file, dapatkan Request ID, dan proses cetak dengan cepat.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "DIGITAL_FILE_TRANSFER",
+    "PRINT_REQUEST_QUEUE",
+    "QR_UPLOAD_PORTAL"
+  ]
 }
