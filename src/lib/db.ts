@@ -153,7 +153,7 @@ export const SEED_REQUESTS: PrintRequest[] = [
     files: [
       {
         id: 'f-5',
-        name: 'Sertifikat_Seminar_Nasional_AI.pdf',
+        name: 'Sertifikat_Seminar_Nasional.pdf',
         size: 5120000,
         type: 'application/pdf',
         pageCount: 15,
