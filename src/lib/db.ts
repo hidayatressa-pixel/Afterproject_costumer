@@ -36,10 +36,11 @@ function openDB(): Promise<IDBDatabase> {
   });
 }
 
-// Generate human-friendly ID like "AP-842"
+// Generate a short, collision-resistant human-friendly request ID.
 export function generateRequestId(): string {
-  const num = Math.floor(100 + Math.random() * 900);
-  return `AP-${num}`;
+  const timePart = Date.now().toString(36).slice(-5).toUpperCase();
+  const randomPart = Math.random().toString(36).slice(2, 5).toUpperCase();
+  return `AP-${timePart}${randomPart}`;
 }
 
 export const SEED_REQUESTS: PrintRequest[] = [
