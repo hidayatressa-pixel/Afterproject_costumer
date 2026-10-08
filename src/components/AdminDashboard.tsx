@@ -187,7 +187,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-neutral-100 flex flex-col">
+    <div className="ap-admin-shell min-h-screen flex flex-col">
       {/* Required Admin Header (Statis) */}
       <header className="relative bg-white border-b border-neutral-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -195,7 +195,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             {/* Header Title: AFTER PROJECT PHOTOCOPY */}
             <div className="flex items-center gap-3">
               <BrandingLockup size="md" />
-              <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-neutral-900 text-white tracking-widest uppercase">
+              <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-bold ap-gradient-button text-white tracking-widest uppercase">
                 OPERATOR KASIR
               </span>
             </div>
@@ -206,7 +206,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 onClick={() => setActiveTab('dashboard')}
                 className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap ${
                   activeTab === 'dashboard'
-                    ? 'bg-neutral-900 text-white shadow-sm'
+                    ? 'ap-gradient-button text-white shadow-lg'
                     : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50'
                 }`}
               >
