@@ -63,6 +63,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   // Settings edit state
   const [editableSettings, setEditableSettings] = useState<StoreSettings>(settings);
   const [settingsSavedMessage, setSettingsSavedMessage] = useState(false);
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
 
   const fetchRequests = async () => {
     setIsLoading(true);
@@ -149,15 +150,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSavingSettings) return;
+
+    setIsSavingSettings(true);
+    setSettingsSavedMessage(false);
     try {
       await saveAdminStoreSettings(editableSettings);
       const nextSettings = { ...editableSettings, operatorPin: settings.operatorPin };
       onSettingsUpdated(nextSettings);
       setEditableSettings(nextSettings);
       setSettingsSavedMessage(true);
-      setTimeout(() => setSettingsSavedMessage(false), 3000);
+      window.setTimeout(() => setSettingsSavedMessage(false), 3000);
     } catch (error) {
       window.alert(error instanceof Error ? error.message : 'Gagal menyimpan pengaturan ke database.');
+    } finally {
+      setIsSavingSettings(false);
     }
   };
 
@@ -961,9 +968,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <div className="flex justify-end">
                 <button
                   type="submit"
-                  className="px-6 py-2.5 bg-neutral-900 text-white text-xs font-bold rounded-xl hover:bg-neutral-800 transition-colors shadow-sm"
+                  disabled={isSavingSettings}
+                  className="px-6 py-2.5 bg-neutral-900 text-white text-xs font-bold rounded-xl hover:bg-neutral-800 disabled:opacity-60 disabled:cursor-not-allowed transition-colors shadow-sm"
                 >
-                  Simpan Perubahan Pengaturan
+                  {isSavingSettings ? 'Menyimpan...' : 'Simpan Perubahan Pengaturan'}
                 </button>
               </div>
             </form>
