@@ -71,6 +71,22 @@ function safeRequest(row: any, files: any[] = []) {
     })),
   };
 }
+function adminSafeRequest(row: any, files: any[] = []) {
+  const request = safeRequest(row, files);
+  return {
+    ...request,
+    files: files.map((file) => ({
+      id: file.id,
+      name: file.original_name,
+      size: file.size_bytes,
+      type: file.mime_type,
+      uploadedAt: file.uploaded_at,
+      expiresAt: file.expires_at,
+      expired: Boolean(file.deleted_at) || Date.parse(file.expires_at) <= Date.now(),
+      storagePath: file.storage_path,
+    })),
+  };
+}
 async function getFiles(requestId: string) {
   const { data, error } = await supabase.from("request_files").select("*").eq("request_id", requestId).order("uploaded_at");
   if (error) throw error;
@@ -200,7 +216,7 @@ Deno.serve(async (req) => {
     if (action === "admin_list") {
       const { data, error } = await supabase.from("print_requests").select("*").order("created_at", { ascending: false }).limit(500);
       if (error) throw error;
-      const requests = await Promise.all((data ?? []).map(async (row) => safeRequest(row, await getFiles(row.id))));
+      const requests = await Promise.all((data ?? []).map(async (row) => adminSafeRequest(row, await getFiles(row.id))));
       return response({ requests });
     }
 
