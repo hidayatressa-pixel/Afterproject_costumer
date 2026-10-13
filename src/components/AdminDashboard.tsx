@@ -138,7 +138,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
   };
 
-  // Open the customer's original uploaded file in a new tab for printing.
+  // Print the uploaded PDF/image from a browser-rendered blob, instead of navigating to a download URL.
   const handlePrintUploadedFile = async (
     e: React.MouseEvent,
     fileItem: { name: string; storagePath?: string; expired?: boolean }
@@ -153,6 +153,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       return;
     }
 
+    const extension = fileItem.name.split('.').pop()?.toLowerCase() || '';
+    const isImage = /^(png|jpe?g|gif|webp|bmp)$/i.test(extension);
+    const isPdf = extension === 'pdf';
+    if (!isImage && !isPdf) {
+      window.alert('Cetak langsung dari browser saat ini mendukung PDF dan gambar (JPG/PNG/WebP). File Word/Excel perlu dibuka lalu dicetak dari aplikasinya, atau dikonversi ke PDF.');
+      return;
+    }
+
     const printTab = window.open('about:blank', '_blank');
     if (!printTab) {
       window.alert('Tab cetak diblokir browser. Izinkan pop-up untuk website ini, lalu coba lagi.');
@@ -161,12 +169,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
     try {
       printTab.document.title = fileItem.name;
-      printTab.document.body.innerHTML = '<p style="font-family:Arial,sans-serif;padding:24px">Menyiapkan file untuk dicetak…</p>';
+      printTab.document.body.innerHTML = '<p style="font-family:Arial,sans-serif;padding:24px">Menyiapkan tampilan cetak…</p>';
       const url = await getAdminDownloadUrl(fileItem.storagePath);
-      printTab.location.href = url;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('File gagal diambil dari penyimpanan.');
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+
+      if (isImage) {
+        printTab.document.open();
+        printTab.document.write(`<!doctype html><html><head><title>${fileItem.name.replace(/[<>&"]/g, '')}</title><style>html,body{margin:0;padding:0;background:#fff}body{display:flex;align-items:center;justify-content:center;min-height:100vh}img{max-width:100%;max-height:100vh;object-fit:contain}@page{margin:8mm}</style></head><body><img id="print-image" src="${objectUrl}" alt="Print file"><script>const img=document.getElementById('print-image');img.onload=()=>setTimeout(()=>window.print(),250);img.onerror=()=>document.body.innerHTML='<p>Gagal menampilkan gambar.</p>';<\/script></body></html>`);
+        printTab.document.close();
+      } else {
+        printTab.document.open();
+        printTab.document.write(`<!doctype html><html><head><title>${fileItem.name.replace(/[<>&"]/g, '')}</title><style>html,body,iframe{width:100%;height:100%;margin:0;border:0}@page{margin:0}</style></head><body><iframe id="print-pdf" src="${objectUrl}" title="PDF untuk dicetak"></iframe><script>const frame=document.getElementById('print-pdf');frame.onload=()=>setTimeout(()=>{try{frame.contentWindow.focus();frame.contentWindow.print()}catch(e){window.print()}},700);<\/script></body></html>`);
+        printTab.document.close();
+      }
+      // Revoke the temporary URL when the print tab is closed.
+      printTab.addEventListener('beforeunload', () => URL.revokeObjectURL(objectUrl));
     } catch (error) {
       printTab.close();
-      window.alert(error instanceof Error ? error.message : 'Gagal membuka file untuk dicetak.');
+      window.alert(error instanceof Error ? error.message : 'Gagal menyiapkan file untuk dicetak. Periksa koneksi dan coba lagi.');
     }
   };
 
