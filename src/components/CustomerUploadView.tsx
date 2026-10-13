@@ -17,10 +17,10 @@ import {
 import confetti from 'canvas-confetti';
 import { PrintRequest, UploadedFileItem, StoreSettings } from '../types';
 import { BrandingLockup } from './BrandingLockup';
-import { generateRequestId, saveRequest } from '../lib/db';
+import { createCustomerRequest } from '../lib/supabaseApi';
 import { playSuccessBeep } from '../lib/audio';
 
-interface CustomerUploadViewProps {
+interface SelectedFileItem extends UploadedFileItem {\n  sourceFile: File;\n}\n\ninterface CustomerUploadViewProps {
   settings: StoreSettings;
   onRequestSubmitted: (request: PrintRequest) => void;
   onOpenQRStandee: () => void;
@@ -35,7 +35,7 @@ export const CustomerUploadView: React.FC<CustomerUploadViewProps> = ({
   const [customerName, setCustomerName] = useState('');
   const [notes, setNotes] = useState('');
   const [storageDevice, setStorageDevice] = useState<'direct' | 'flashdisk' | 'cloud_drive'>('direct');
-  const [files, setFiles] = useState<UploadedFileItem[]>([]);
+  const [files, setFiles] = useState<SelectedFileItem[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -63,32 +63,24 @@ export const CustomerUploadView: React.FC<CustomerUploadViewProps> = ({
   const processSelectedFiles = (selectedFiles: File[]) => {
     setValidationError(null);
 
-    selectedFiles.forEach((file) => {
-      const reader = new FileReader();
-      const itemId = 'file_' + Math.random().toString(36).substring(2, 9);
-
+    const accepted = selectedFiles.map((file): SelectedFileItem => {
       let estimatedPages = 1;
       if (file.type.includes('pdf')) {
         estimatedPages = Math.max(1, Math.min(250, Math.round(file.size / (80 * 1024))));
       } else if (file.type.includes('word') || file.name.endsWith('.docx') || file.name.endsWith('.doc')) {
         estimatedPages = Math.max(1, Math.min(100, Math.round(file.size / (50 * 1024))));
       }
-
-      reader.onload = () => {
-        const item: UploadedFileItem = {
-          id: itemId,
-          name: file.name,
-          size: file.size,
-          type: file.type || 'application/octet-stream',
-          dataUrl: reader.result as string,
-          pageCount: estimatedPages,
-          uploadedAt: new Date().toISOString(),
-        };
-        setFiles((prev) => [...prev, item]);
+      return {
+        id: 'file_' + Math.random().toString(36).substring(2, 9),
+        name: file.name,
+        size: file.size,
+        type: file.type || 'application/octet-stream',
+        pageCount: estimatedPages,
+        uploadedAt: new Date().toISOString(),
+        sourceFile: file,
       };
-
-      reader.readAsDataURL(file);
     });
+    setFiles((prev) => [...prev, ...accepted]);
   };
 
   const removeFile = (id: string) => {
@@ -118,18 +110,14 @@ export const CustomerUploadView: React.FC<CustomerUploadViewProps> = ({
 
     try {
       setIsSubmitting(true);
-      const reqId = generateRequestId();
-      const newRequest: PrintRequest = {
-        id: reqId,
-        createdAt: new Date().toISOString(),
+      const newRequest = await createCustomerRequest({
         customerName: customerName.trim(),
-        files,
-        storageDevice,
-        notes: notes.trim() || undefined,
-        status: 'pending',
-      };
-
-      await saveRequest(newRequest);
+        requestData: {
+          storageDevice,
+          notes: notes.trim() || undefined,
+        },
+        files: files.map((file) => file.sourceFile),
+      });
       playSuccessBeep();
 
       try {
@@ -147,7 +135,7 @@ export const CustomerUploadView: React.FC<CustomerUploadViewProps> = ({
       onRequestSubmitted(newRequest);
     } catch (err) {
       console.error('Error saving request:', err);
-      setValidationError('Gagal mengirim file. Silakan coba lagi.');
+      setValidationError(err instanceof Error ? err.message : 'Gagal mengirim file. Silakan coba lagi.');
     } finally {
       setIsSubmitting(false);
     }
