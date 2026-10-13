@@ -77,7 +77,7 @@ async function getFiles(requestId: string) {
   return data ?? [];
 }
 function randomId() {
-  return "AP-" + crypto.randomUUID().replace(/-/g, "").slice(0, 8).toUpperCase();
+  return "AP-" + crypto.randomUUID().replace(/-/g, "").slice(0, 12).toUpperCase();
 }
 function cleanText(v: unknown, max = 200) {
   return typeof v === "string" ? v.trim().slice(0, max) : "";
@@ -166,11 +166,17 @@ Deno.serve(async (req) => {
 
     if (action === "track_request") {
       const requestId = cleanText(body.requestId, 40).toUpperCase();
-      if (!/^AP-[A-Z0-9]{8}$/.test(requestId)) return response({ error: "Request ID tidak valid." }, 400);
+      const customer = await verifyToken(cleanText(body.customerToken, 4000), "customer");
+      if (!/^AP-[A-Z0-9]{12}$/.test(requestId)) return response({ error: "Request ID tidak valid." }, 400);
+      if (!customer || customer.rid !== requestId) return response({ error: "Token pelacakan tidak valid atau sudah kedaluwarsa. Gunakan perangkat/browser yang dipakai saat mengirim pesanan." }, 401);
       const { data, error } = await supabase.from("print_requests").select("*").eq("id", requestId).maybeSingle();
       if (error) throw error;
       if (!data) return response({ error: "Pesanan tidak ditemukan." }, 404);
-      return response({ request: safeRequest(data, await getFiles(requestId)) });
+      // Customers receive only receipt-safe details and never storage paths or contact data.
+      const files = await getFiles(requestId);
+      const safe = safeRequest(data, files);
+      const { customerName: _customerName, customerPhone: _customerPhone, ...safeData } = safe;
+      return response({ request: safeData });
     }
 
     if (action === "cleanup_expired") {
