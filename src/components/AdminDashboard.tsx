@@ -28,7 +28,8 @@ import {
 import { PrintRequest, StoreSettings, RequestStatus } from '../types';
 import { BrandingLockup } from './BrandingLockup';
 import { formatRupiah } from '../lib/pricing';
-import { getAllRequests, updateRequestStatus, saveStoreSettings } from '../lib/db';
+import { saveStoreSettings } from '../lib/db';
+import { getAdminRequests, setAdminRequestStatus, getAdminDownloadUrl } from '../lib/supabaseApi';
 import { RequestDetailModal } from './RequestDetailModal';
 import { QRDisplayView } from './QRDisplayView';
 import { PrintTicketModal } from './PrintTicketModal';
@@ -66,8 +67,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   const fetchRequests = async () => {
     setIsLoading(true);
-    const data = await getAllRequests();
-    setRequests(data);
+    try {
+      const data = await getAdminRequests();
+      setRequests(data);
+    } catch (error) {
+      console.error('Gagal memuat pesanan Supabase:', error);
+    }
     setIsLoading(false);
   };
 
@@ -105,31 +110,31 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     else if (req.status === 'ready') nextStatus = 'completed';
     else if (req.status === 'completed') nextStatus = 'pending';
 
-    await updateRequestStatus(req.id, nextStatus);
+    await setAdminRequestStatus(req.id, nextStatus);
     fetchRequests();
   };
 
-  const handleDownloadFile = (e: React.MouseEvent, fileItem: { name: string; dataUrl?: string }) => {
+  const handleDownloadFile = async (e: React.MouseEvent, fileItem: { name: string; storagePath?: string; expired?: boolean }) => {
     e.stopPropagation();
-    if (fileItem.dataUrl) {
-      const a = document.createElement('a');
-      a.href = fileItem.dataUrl;
-      a.download = fileItem.name;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } else {
-      const blob = new Blob([`AFTER PROJECT PHOTOCOPY - File Placeholder: ${fileItem.name}`], {
-        type: 'text/plain',
-      });
-      const url = URL.createObjectURL(blob);
+    if (!fileItem.storagePath) {
+      window.alert('Lokasi file tidak tersedia. Muat ulang daftar pesanan.');
+      return;
+    }
+    if (fileItem.expired) {
+      window.alert('Masa akses file ini sudah berakhir (24 jam).');
+      return;
+    }
+    try {
+      const url = await getAdminDownloadUrl(fileItem.storagePath);
       const a = document.createElement('a');
       a.href = url;
       a.download = fileItem.name;
+      a.rel = 'noopener';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : 'Gagal membuat tautan download.');
     }
   };
 
