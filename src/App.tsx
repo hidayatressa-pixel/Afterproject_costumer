@@ -10,11 +10,10 @@ import { DEFAULT_STORE_SETTINGS } from './lib/pricing';
 import {
   getStoreSettings,
   getAllRequests,
-  getRequestById,
   subscribeToSync,
 } from './lib/db';
 import { playNotificationChime } from './lib/audio';
-import { clearAdminToken, getAdminToken } from './lib/supabaseApi';
+import { clearAdminToken, getAdminToken, trackCustomerRequest, getAdminRequests } from './lib/supabaseApi';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<'customer' | 'admin'>('customer');
@@ -39,12 +38,10 @@ export default function App() {
     const modeParam = params.get('mode') || params.get('view') || params.get('page');
 
     if (trackId) {
-      getRequestById(trackId).then((req) => {
-        if (req) {
-          setActiveReceipt(req);
-        } else {
-          setShowTrackerModal(true);
-        }
+      trackCustomerRequest(trackId).then((req) => {
+        setActiveReceipt(req);
+      }).catch(() => {
+        setShowTrackerModal(true);
       });
     }
 
