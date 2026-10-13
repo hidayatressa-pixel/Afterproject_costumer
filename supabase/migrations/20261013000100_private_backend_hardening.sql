@@ -12,9 +12,9 @@ grant all on table public.print_requests to service_role;
 grant all on table public.request_files to service_role;
 
 -- Ensure the customer-files bucket remains private.
-insert into storage.buckets (id, name, public)
-values ('customer-files', 'customer-files', false)
-on conflict (id) do update set public = false;
+insert into storage.buckets (id, name, public, file_size_limit)
+values ('customer-files', 'customer-files', false, 31457280)
+on conflict (id) do update set public = false, file_size_limit = 31457280;
 
 -- Do not create storage.objects policies for anon/authenticated.
 -- Upload/download access is mediated by short-lived signed URLs issued by app-api.
