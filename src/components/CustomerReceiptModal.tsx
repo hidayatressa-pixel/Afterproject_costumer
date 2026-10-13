@@ -11,7 +11,7 @@ import {
 import { PrintRequest } from '../types';
 import { BrandingLockup } from './BrandingLockup';
 import { formatRupiah } from '../lib/pricing';
-import { getRequestById } from '../lib/db';
+import { trackCustomerRequest } from '../lib/supabaseApi';
 
 interface CustomerReceiptModalProps {
   request: PrintRequest;
@@ -52,11 +52,14 @@ export const CustomerReceiptModal: React.FC<CustomerReceiptModalProps> = ({
   // Periodic poll to check if operator changed status
   const refreshStatus = async () => {
     setIsRefreshing(true);
-    const updated = await getRequestById(currentReq.id);
-    if (updated) {
+    try {
+      const updated = await trackCustomerRequest(currentReq.id);
       setCurrentReq(updated);
+    } catch (error) {
+      console.error('Gagal memperbarui status pesanan:', error);
+    } finally {
+      setIsRefreshing(false);
     }
-    setTimeout(() => setIsRefreshing(false), 500);
   };
 
   const handleCopyId = () => {
