@@ -138,6 +138,38 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
   };
 
+  // Open the customer's original uploaded file in a new tab for printing.
+  const handlePrintUploadedFile = async (
+    e: React.MouseEvent,
+    fileItem: { name: string; storagePath?: string; expired?: boolean }
+  ) => {
+    e.stopPropagation();
+    if (!fileItem.storagePath) {
+      window.alert('Lokasi file tidak tersedia. Muat ulang daftar pesanan.');
+      return;
+    }
+    if (fileItem.expired) {
+      window.alert('Masa akses file ini sudah berakhir (24 jam).');
+      return;
+    }
+
+    const printTab = window.open('about:blank', '_blank');
+    if (!printTab) {
+      window.alert('Tab cetak diblokir browser. Izinkan pop-up untuk website ini, lalu coba lagi.');
+      return;
+    }
+
+    try {
+      printTab.document.title = fileItem.name;
+      printTab.document.body.innerHTML = '<p style="font-family:Arial,sans-serif;padding:24px">Menyiapkan file untuk dicetak…</p>';
+      const url = await getAdminDownloadUrl(fileItem.storagePath);
+      printTab.location.href = url;
+    } catch (error) {
+      printTab.close();
+      window.alert(error instanceof Error ? error.message : 'Gagal membuka file untuk dicetak.');
+    }
+  };
+
   const handleDownloadAllFiles = (e: React.MouseEvent, req: PrintRequest) => {
     e.stopPropagation();
     if (!req.files || req.files.length === 0) return;
@@ -682,6 +714,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                                     <span>Download</span>
                                   </button>
                                 ) : null}
+
+                                {req.status === 'pending' && primaryFile && (
+                                  <button
+                                    onClick={(e) => handlePrintUploadedFile(e, primaryFile)}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm active:scale-95 transition-all"
+                                    title="Buka file asli pelanggan untuk dicetak"
+                                  >
+                                    <Printer className="w-3.5 h-3.5" />
+                                    <span>Cetak File</span>
+                                  </button>
+                                )}
 
                                 <button
                                   onClick={(e) => handleQuickCycleStatus(e, req)}
