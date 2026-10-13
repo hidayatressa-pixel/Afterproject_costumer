@@ -190,9 +190,7 @@ Deno.serve(async (req) => {
       if (!data) return response({ error: "Pesanan tidak ditemukan." }, 404);
       // Customers receive only receipt-safe details and never storage paths or contact data.
       const files = await getFiles(requestId);
-      const safe = safeRequest(data, files);
-      const { customerName: _customerName, customerPhone: _customerPhone, ...safeData } = safe;
-      return response({ request: safeData });
+      return response({ request: safeRequest(data, files) });
     }
 
     if (action === "cleanup_expired") {
