@@ -9,7 +9,6 @@ import { StoreSettings, PrintRequest } from './types';
 import { DEFAULT_STORE_SETTINGS } from './lib/pricing';
 import {
   getStoreSettings,
-  getAllRequests,
   subscribeToSync,
 } from './lib/db';
 import { playNotificationChime } from './lib/audio';
@@ -81,6 +80,7 @@ export default function App() {
     sessionStorage.setItem('after_project_admin_auth', 'true');
     setShowAdminPinModal(false);
     handleSwitchView('admin');
+    refreshPendingCount();
   };
 
   const handleAdminLogout = () => {
@@ -91,9 +91,16 @@ export default function App() {
   };
 
   const refreshPendingCount = async () => {
-    const list = await getAllRequests();
-    const count = list.filter((r) => r.status === 'pending').length;
-    setPendingCount(count);
+    if (!getAdminToken()) {
+      setPendingCount(0);
+      return;
+    }
+    try {
+      const list = await getAdminRequests();
+      setPendingCount(list.filter((r) => r.status === 'pending').length);
+    } catch {
+      setPendingCount(0);
+    }
   };
 
   // Cross-tab and live sync subscription
