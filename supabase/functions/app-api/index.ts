@@ -1,4 +1,3 @@
-/// <reference path="../_shared/deno.d.ts" />
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 
 const corsHeaders = {
@@ -54,12 +53,12 @@ async function verifyToken(token: string, expectedRole: string) {
 function safeRequest(row: any, files: any[] = []) {
   const data = row.request_data ?? {};
   return {
+    ...data,
     id: row.id,
     createdAt: row.created_at,
     customerName: row.customer_name,
     customerPhone: row.customer_phone ?? undefined,
     status: row.status,
-    ...data,
     files: files.map((f) => ({
       id: f.id,
       name: f.original_name,
@@ -104,7 +103,12 @@ Deno.serve(async (req) => {
       if (!customerName) return response({ error: "Nama pelanggan wajib diisi." }, 400);
       const requestId = randomId();
       const customerToken = await signToken({ role: "customer", rid: requestId, exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60 });
-      const requestData = body.requestData && typeof body.requestData === "object" ? body.requestData : {};
+      const rawData = body.requestData && typeof body.requestData === "object" ? body.requestData : {};
+      const allowedFields = ["storageDevice", "storageNotes", "notes", "paperSize", "colorMode", "duplex", "copies", "paperType", "binding", "specificPages", "estimatedPrice"];
+      const requestData: Record<string, unknown> = {};
+      for (const field of allowedFields) {
+        if (field in rawData) requestData[field] = rawData[field];
+      }
       const { data, error } = await supabase.from("print_requests").insert({
         id: requestId,
         customer_name: customerName,
