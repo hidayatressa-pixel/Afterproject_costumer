@@ -1,5 +1,5 @@
 import { requireSupabase } from './supabase';
-import type { PrintRequest, RequestStatus, UploadedFileItem } from '../types';
+import type { PrintRequest, RequestStatus, UploadedFileItem, StoreSettings } from '../types';
 
 type ApiPayload = Record<string, unknown>;
 
@@ -118,6 +118,18 @@ export async function adminLogin(pin: string): Promise<string> {
 
 export function getAdminToken(): string {
   return sessionStorage.getItem('after_project_admin_token') || '';
+}
+
+export async function getStoreSettings(): Promise<Partial<StoreSettings>> {
+  const result = await appApi<{ settings: Partial<StoreSettings> }>({ action: 'get_store_settings' });
+  return result.settings ?? {};
+}
+
+export async function saveAdminStoreSettings(settings: StoreSettings): Promise<void> {
+  await appApi<{ settings: Partial<StoreSettings> }>(
+    { action: 'admin_save_store_settings', settings },
+    getAdminToken(),
+  );
 }
 
 export async function getAdminRequests(): Promise<PrintRequest[]> {
