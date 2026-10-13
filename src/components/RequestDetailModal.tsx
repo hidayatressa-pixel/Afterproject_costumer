@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { PrintRequest, StoreSettings, RequestStatus, PaymentStatus } from '../types';
 import { formatRupiah } from '../lib/pricing';
-import { updateRequestStatus, deleteRequest } from '../lib/db';
+import { setAdminRequestStatus, getAdminDownloadUrl } from '../lib/supabaseApi';
 import { PrintTicketModal } from './PrintTicketModal';
 
 interface RequestDetailModalProps {
@@ -46,30 +46,26 @@ export const RequestDetailModal: React.FC<RequestDetailModalProps> = ({
   // Status transitions
   const handleStatusChange = async (newStatus: RequestStatus) => {
     setCurrentStatus(newStatus);
-    await updateRequestStatus(request.id, newStatus, actualPrice, paymentStatus);
+    await setAdminRequestStatus(request.id, newStatus, { actualPrice, paymentStatus });
     onUpdated();
   };
 
   const handlePaymentStatusChange = async (newPayStatus: PaymentStatus) => {
     setPaymentStatus(newPayStatus);
-    await updateRequestStatus(request.id, currentStatus, actualPrice, newPayStatus);
+    await setAdminRequestStatus(request.id, currentStatus, { actualPrice, paymentStatus: newPayStatus });
     onUpdated();
   };
 
   const handleSavePrice = async () => {
     setIsSaving(true);
-    await updateRequestStatus(request.id, currentStatus, actualPrice, paymentStatus);
+    await setAdminRequestStatus(request.id, currentStatus, { actualPrice, paymentStatus });
     setIsEditingPrice(false);
     setIsSaving(false);
     onUpdated();
   };
 
   const handleDelete = async () => {
-    if (confirm(`Yakin ingin menghapus permintaan cetak ${request.id} (${request.customerName})?`)) {
-      await deleteRequest(request.id);
-      onUpdated();
-      onClose();
-    }
+    alert('Penghapusan pesanan belum diaktifkan pada backend bersama. File tetap privat dan akan dihapus sesuai masa retensi 24 jam.');
   };
 
   // WhatsApp quick notification
@@ -93,27 +89,22 @@ export const RequestDetailModal: React.FC<RequestDetailModalProps> = ({
   };
 
   // Download a file
-  const handleDownloadFile = (fileItem: { name: string; dataUrl?: string }) => {
-    if (fileItem.dataUrl) {
-      const a = document.createElement('a');
-      a.href = fileItem.dataUrl;
-      a.download = fileItem.name;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } else {
-      // Mock generated fallback download for seeded demo items
-      const blob = new Blob([`AFTER PROJECT PHOTOCOPY - File Placeholder: ${fileItem.name}`], {
-        type: 'text/plain',
-      });
-      const url = URL.createObjectURL(blob);
+  const handleDownloadFile = async (fileItem: { name: string; storagePath?: string; expired?: boolean }) => {
+    if (!fileItem.storagePath || fileItem.expired) {
+      alert(fileItem.expired ? 'Masa akses file sudah berakhir (24 jam).' : 'Lokasi file tidak tersedia. Muat ulang pesanan.');
+      return;
+    }
+    try {
+      const url = await getAdminDownloadUrl(fileItem.storagePath);
       const a = document.createElement('a');
       a.href = url;
       a.download = fileItem.name;
+      a.rel = 'noopener';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Gagal mengunduh file.');
     }
   };
 
