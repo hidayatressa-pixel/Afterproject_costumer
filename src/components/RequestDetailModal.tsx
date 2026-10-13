@@ -108,6 +108,30 @@ export const RequestDetailModal: React.FC<RequestDetailModalProps> = ({
     }
   };
 
+  // Open an individual customer upload in a browser tab so it can be printed.
+  const handlePrintUploadedFile = async (fileItem: { name: string; storagePath?: string; expired?: boolean }) => {
+    if (!fileItem.storagePath || fileItem.expired) {
+      alert(fileItem.expired ? 'Masa akses file sudah berakhir (24 jam).' : 'Lokasi file tidak tersedia. Muat ulang pesanan.');
+      return;
+    }
+
+    const printTab = window.open('about:blank', '_blank');
+    if (!printTab) {
+      alert('Tab cetak diblokir browser. Izinkan pop-up untuk website ini, lalu coba lagi.');
+      return;
+    }
+
+    try {
+      printTab.document.title = fileItem.name;
+      printTab.document.body.innerHTML = '<p style="font-family:Arial,sans-serif;padding:24px">Menyiapkan file untuk dicetak…</p>';
+      const url = await getAdminDownloadUrl(fileItem.storagePath);
+      printTab.location.href = url;
+    } catch (error) {
+      printTab.close();
+      alert(error instanceof Error ? error.message : 'Gagal membuka file untuk dicetak.');
+    }
+  };
+
   return (
     <>
       <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
@@ -250,6 +274,16 @@ export const RequestDetailModal: React.FC<RequestDetailModalProps> = ({
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => handlePrintUploadedFile(file)}
+                        className="px-3 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl flex items-center gap-1.5 shadow-sm transition-colors"
+                        title="Buka file asli untuk dicetak"
+                      >
+                        <Printer className="w-3.5 h-3.5" />
+                        <span>Cetak File</span>
+                      </button>
+
                       {file.dataUrl && (
                         <button
                           type="button"
