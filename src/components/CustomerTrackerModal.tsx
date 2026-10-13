@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Search, X, AlertCircle, ArrowRight } from 'lucide-react';
 import { PrintRequest } from '../types';
-import { getRequestById, getAllRequests } from '../lib/db';
+import { trackCustomerRequest } from '../lib/supabaseApi';
 import { BrandingLockup } from './BrandingLockup';
 import { formatRupiah } from '../lib/pricing';
 
@@ -29,26 +29,13 @@ export const CustomerTrackerModal: React.FC<CustomerTrackerModalProps> = ({
 
     try {
       const q = searchQuery.trim().toUpperCase();
-      let result = await getRequestById(q);
-
-      if (!result) {
-        const all = await getAllRequests();
-        result =
-          all.find(
-            (r) =>
-              r.id.toUpperCase() === q ||
-              (r.customerPhone && r.customerPhone.replace(/[^0-9]/g, '').includes(searchQuery.replace(/[^0-9]/g, ''))) ||
-              r.customerName.toLowerCase().includes(searchQuery.toLowerCase())
-          ) || null;
+      if (!/^AP-[A-Z0-9]{12}$/.test(q)) {
+        throw new Error('Masukkan Request ID lengkap (format AP-XXXXXXXXXXXX). Pelacakan memerlukan sesi browser saat pesanan dibuat.');
       }
-
-      if (result) {
-        setFoundRequest(result);
-      } else {
-        setSearchError('Pesanan tidak ditemukan. Periksa kembali Request ID atau Nomor WhatsApp Anda.');
-      }
+      const result = await trackCustomerRequest(q);
+      setFoundRequest(result);
     } catch {
-      setSearchError('Terjadi kesalahan saat mencari pesanan.');
+      setSearchError('Pesanan tidak ditemukan atau sesi pelacakan tidak tersedia. Gunakan browser yang sama saat mengirim file.');
     } finally {
       setIsSearching(false);
     }
@@ -72,7 +59,7 @@ export const CustomerTrackerModal: React.FC<CustomerTrackerModalProps> = ({
             Lacak Status Cetak Dokumen
           </h3>
           <p className="text-xs text-slate-500 text-center mt-1">
-            Masukkan Request ID (misal: AP-412) atau Nomor WhatsApp pemesan.
+            Masukkan Request ID lengkap dari browser yang dipakai untuk mengirim pesanan.
           </p>
 
           <form onSubmit={handleSearch} className="mt-5">
@@ -82,7 +69,7 @@ export const CustomerTrackerModal: React.FC<CustomerTrackerModalProps> = ({
                 autoFocus
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Contoh: AP-412 atau 0812..."
+                placeholder="Contoh: AP-1A2B3C4D5E6F"
                 className="w-full pl-10 pr-24 py-3 text-sm bg-blue-50/50 border border-blue-200 rounded-2xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 font-mono"
               />
               <Search className="w-4 h-4 text-blue-500 absolute left-3.5 top-3.5" />

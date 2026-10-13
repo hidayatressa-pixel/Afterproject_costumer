@@ -9,11 +9,10 @@ import { StoreSettings, PrintRequest } from './types';
 import { DEFAULT_STORE_SETTINGS } from './lib/pricing';
 import {
   getStoreSettings,
-  getAllRequests,
-  getRequestById,
   subscribeToSync,
 } from './lib/db';
 import { playNotificationChime } from './lib/audio';
+import { clearAdminToken, getAdminToken, trackCustomerRequest, getAdminRequests } from './lib/supabaseApi';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<'customer' | 'admin'>('customer');
@@ -21,7 +20,7 @@ export default function App() {
   const [showTrackerModal, setShowTrackerModal] = useState(false);
   const [showAdminPinModal, setShowAdminPinModal] = useState(false);
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
-    return sessionStorage.getItem('after_project_admin_auth') === 'true';
+    return sessionStorage.getItem('after_project_admin_auth') === 'true' && Boolean(getAdminToken());
   });
   const [activeReceipt, setActiveReceipt] = useState<PrintRequest | null>(null);
   const [pendingCount, setPendingCount] = useState<number>(0);
@@ -38,16 +37,14 @@ export default function App() {
     const modeParam = params.get('mode') || params.get('view') || params.get('page');
 
     if (trackId) {
-      getRequestById(trackId).then((req) => {
-        if (req) {
-          setActiveReceipt(req);
-        } else {
-          setShowTrackerModal(true);
-        }
+      trackCustomerRequest(trackId).then((req) => {
+        setActiveReceipt(req);
+      }).catch(() => {
+        setShowTrackerModal(true);
       });
     }
 
-    const hasSessionAuth = sessionStorage.getItem('after_project_admin_auth') === 'true';
+    const hasSessionAuth = sessionStorage.getItem('after_project_admin_auth') === 'true' && Boolean(getAdminToken());
 
     if (modeParam === 'owner' || modeParam === 'admin') {
       if (hasSessionAuth) {
@@ -83,18 +80,27 @@ export default function App() {
     sessionStorage.setItem('after_project_admin_auth', 'true');
     setShowAdminPinModal(false);
     handleSwitchView('admin');
+    refreshPendingCount();
   };
 
   const handleAdminLogout = () => {
     setIsAdminAuthenticated(false);
     sessionStorage.removeItem('after_project_admin_auth');
+    clearAdminToken();
     handleSwitchView('customer');
   };
 
   const refreshPendingCount = async () => {
-    const list = await getAllRequests();
-    const count = list.filter((r) => r.status === 'pending').length;
-    setPendingCount(count);
+    if (!getAdminToken()) {
+      setPendingCount(0);
+      return;
+    }
+    try {
+      const list = await getAdminRequests();
+      setPendingCount(list.filter((r) => r.status === 'pending').length);
+    } catch {
+      setPendingCount(0);
+    }
   };
 
   // Cross-tab and live sync subscription
@@ -199,7 +205,6 @@ export default function App() {
       {/* PIN Access Modal for Owner/Operator */}
       {showAdminPinModal && (
         <AdminLoginModal
-          correctPin={settings.operatorPin}
           onSuccess={handlePinSuccess}
           onClose={() => setShowAdminPinModal(false)}
         />
