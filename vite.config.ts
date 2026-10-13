@@ -5,6 +5,8 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
+    // GitHub Pages publishes this project under /Afterproject_costumer/.
+    base: '/Afterproject_costumer/',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
