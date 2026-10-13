@@ -7,12 +7,9 @@ import { CustomerTrackerModal } from './components/CustomerTrackerModal';
 import { AdminLoginModal } from './components/AdminLoginModal';
 import { StoreSettings, PrintRequest } from './types';
 import { DEFAULT_STORE_SETTINGS } from './lib/pricing';
-import {
-  getStoreSettings,
-  subscribeToSync,
-} from './lib/db';
+import { subscribeToSync } from './lib/db';
 import { playNotificationChime } from './lib/audio';
-import { clearAdminToken, getAdminToken, trackCustomerRequest, getAdminRequests } from './lib/supabaseApi';
+import { clearAdminToken, getAdminToken, trackCustomerRequest, getAdminRequests, getStoreSettings } from './lib/supabaseApi';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<'customer' | 'admin'>('customer');
@@ -28,7 +25,13 @@ export default function App() {
 
   // Initialize settings, view mode from URL or localStorage, and pending requests
   useEffect(() => {
-    getStoreSettings().then(setSettings);
+    getStoreSettings().then((stored) => {
+      setSettings({
+        ...DEFAULT_STORE_SETTINGS,
+        ...stored,
+        pricing: { ...DEFAULT_STORE_SETTINGS.pricing, ...(stored.pricing ?? {}) },
+      });
+    }).catch((error) => console.error('Gagal memuat pengaturan toko dari Supabase:', error));
     refreshPendingCount();
 
     // Check URL parameters for explicit mode or tracking
@@ -102,6 +105,26 @@ export default function App() {
       setPendingCount(0);
     }
   };
+
+  // Refresh shared store settings periodically so other open devices receive updates.
+  useEffect(() => {
+    const refreshSettings = () => {
+      getStoreSettings().then((stored) => {
+        setSettings((current) => ({
+          ...DEFAULT_STORE_SETTINGS,
+          ...current,
+          ...stored,
+          pricing: {
+            ...DEFAULT_STORE_SETTINGS.pricing,
+            ...current.pricing,
+            ...(stored.pricing ?? {}),
+          },
+        }));
+      }).catch((error) => console.error('Gagal memperbarui pengaturan toko:', error));
+    };
+    const interval = window.setInterval(refreshSettings, 30000);
+    return () => window.clearInterval(interval);
+  }, []);
 
   // Cross-tab and live sync subscription
   useEffect(() => {
