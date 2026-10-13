@@ -169,6 +169,21 @@ Deno.serve(async (req) => {
       return response({ request: safeRequest(data, await getFiles(requestId)) });
     }
 
+    if (action === "cleanup_expired") {
+      const cleanupSecret = Deno.env.get("CLEANUP_SECRET");
+      if (!cleanupSecret || req.headers.get("x-cleanup-secret") !== cleanupSecret) return response({ error: "Unauthorized cleanup." }, 401);
+      const { data: expired, error } = await supabase.from("request_files").select("id,storage_path").lte("expires_at", new Date().toISOString()).is("deleted_at", null).limit(500);
+      if (error) throw error;
+      let deleted = 0;
+      for (const file of expired ?? []) {
+        const { error: removeError } = await supabase.storage.from(BUCKET).remove([file.storage_path]);
+        if (removeError) continue;
+        const { error: markError } = await supabase.from("request_files").update({ deleted_at: new Date().toISOString() }).eq("id", file.id);
+        if (!markError) deleted++;
+      }
+      return response({ deleted });
+    }
+
     const admin = await verifyToken(cleanText(body.adminToken, 4000), "admin");
     if (!admin) return response({ error: "Sesi operator tidak valid atau sudah kedaluwarsa." }, 401);
 
@@ -205,21 +220,6 @@ Deno.serve(async (req) => {
       const { data, error: signError } = await supabase.storage.from(BUCKET).createSignedUrl(path, Math.min(300, remainingSeconds), { download: file.original_name });
       if (signError) throw signError;
       return response({ url: data.signedUrl, expiresIn: Math.min(300, remainingSeconds) });
-    }
-
-    if (action === "cleanup_expired") {
-      const cleanupSecret = Deno.env.get("CLEANUP_SECRET");
-      if (!cleanupSecret || req.headers.get("x-cleanup-secret") !== cleanupSecret) return response({ error: "Unauthorized cleanup." }, 401);
-      const { data: expired, error } = await supabase.from("request_files").select("id,storage_path").lte("expires_at", new Date().toISOString()).is("deleted_at", null).limit(500);
-      if (error) throw error;
-      let deleted = 0;
-      for (const file of expired ?? []) {
-        const { error: removeError } = await supabase.storage.from(BUCKET).remove([file.storage_path]);
-        if (removeError) continue;
-        const { error: markError } = await supabase.from("request_files").update({ deleted_at: new Date().toISOString() }).eq("id", file.id);
-        if (!markError) deleted++;
-      }
-      return response({ deleted });
     }
 
     return response({ error: "Action tidak dikenal." }, 400);
