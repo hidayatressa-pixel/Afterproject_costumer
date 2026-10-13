@@ -114,6 +114,13 @@ Deno.serve(async (req) => {
       return response({ token, expiresIn: 43200 });
     }
 
+    if (action === "get_store_settings") {
+      const { data, error } = await supabase.from("store_settings")
+        .select("settings").eq("key", "store").maybeSingle();
+      if (error) throw error;
+      return response({ settings: data?.settings ?? {} });
+    }
+
     if (action === "create_request") {
       const customerName = cleanText(body.customerName, 120);
       if (!customerName) return response({ error: "Nama pelanggan wajib diisi." }, 400);
@@ -210,6 +217,23 @@ Deno.serve(async (req) => {
 
     const admin = await verifyToken(cleanText(body.adminToken, 4000), "admin");
     if (!admin) return response({ error: "Sesi operator tidak valid atau sudah kedaluwarsa." }, 401);
+
+    if (action === "admin_save_store_settings") {
+      const incoming = body.settings && typeof body.settings === "object" ? body.settings : {};
+      const settings: Record<string, unknown> = {};
+      for (const field of ["storeName", "storeSubbrand", "tagline", "storeAddress", "storeWhatsapp", "operatingHours", "soundAlertsEnabled"]) {
+        if (field in incoming) settings[field] = incoming[field];
+      }
+      if (incoming.pricing && typeof incoming.pricing === "object") {
+        settings.pricing = incoming.pricing;
+      }
+      // Keep the operator PIN in Edge Function secrets; never persist it in the public settings row.
+      const { data, error } = await supabase.from("store_settings")
+        .upsert({ key: "store", settings, updated_at: new Date().toISOString() }, { onConflict: "key" })
+        .select("settings").single();
+      if (error) throw error;
+      return response({ settings: data.settings });
+    }
 
     if (action === "admin_list") {
       const { data, error } = await supabase.from("print_requests").select("*").order("created_at", { ascending: false }).limit(500);
