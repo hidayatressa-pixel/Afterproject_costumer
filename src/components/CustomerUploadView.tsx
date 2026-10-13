@@ -20,7 +20,11 @@ import { BrandingLockup } from './BrandingLockup';
 import { createCustomerRequest } from '../lib/supabaseApi';
 import { playSuccessBeep } from '../lib/audio';
 
-interface SelectedFileItem extends UploadedFileItem {\n  sourceFile: File;\n}\n\ninterface CustomerUploadViewProps {
+interface SelectedFileItem extends UploadedFileItem {
+  sourceFile: File;
+}
+
+interface CustomerUploadViewProps {
   settings: StoreSettings;
   onRequestSubmitted: (request: PrintRequest) => void;
   onOpenQRStandee: () => void;
