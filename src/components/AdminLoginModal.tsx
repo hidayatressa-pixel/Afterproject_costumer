@@ -1,29 +1,33 @@
 import React, { useState } from 'react';
 import { Lock, X, AlertCircle } from 'lucide-react';
 import { BrandingLockup } from './BrandingLockup';
+import { adminLogin } from '../lib/supabaseApi';
 
 interface AdminLoginModalProps {
-  correctPin: string;
   onSuccess: () => void;
   onClose: () => void;
 }
 
 export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
-  correctPin,
   onSuccess,
   onClose,
 }) => {
   const [pin, setPin] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const effectivePin = correctPin.trim();
-    if (effectivePin && pin.trim() === effectivePin) {
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      await adminLogin(pin.trim());
       onSuccess();
-    } else {
-      setError('PIN salah. Silakan coba lagi.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login gagal. Periksa koneksi dan PIN.');
       setPin('');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -108,21 +112,13 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
             <div className="flex flex-col gap-2">
               <button
                 type="submit"
+                disabled={isSubmitting}
                 className="w-full py-3 ap-gradient-button text-white text-xs font-black rounded-2xl transition-all shadow-md shadow-blue-500/20 active:scale-95"
               >
-                MASUK KE DASHBOARD
+                {isSubmitting ? 'MEMERIKSA PIN...' : 'MASUK KE DASHBOARD'}
               </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setPin('1234');
-                  setError(null);
-                }}
-                className="text-[11px] text-blue-600 hover:text-blue-800 font-bold py-1"
-              >
-                Gunakan Demo PIN (1234)
-              </button>
+
             </div>
           </form>
         </div>
