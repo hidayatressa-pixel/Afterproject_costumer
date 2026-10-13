@@ -44,7 +44,7 @@ export default function App() {
       });
     }
 
-    const hasSessionAuth = sessionStorage.getItem('after_project_admin_auth') === 'true';
+    const hasSessionAuth = sessionStorage.getItem('after_project_admin_auth') === 'true' && Boolean(getAdminToken());
 
     if (modeParam === 'owner' || modeParam === 'admin') {
       if (hasSessionAuth) {
