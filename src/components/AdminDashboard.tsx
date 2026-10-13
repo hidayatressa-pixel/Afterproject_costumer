@@ -412,37 +412,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </div>
             </div>
 
-            {/* Quick Action Queue Banner */}
-            <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-950 text-white rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl border border-blue-900/50">
-              <div>
-                <span className="text-xs font-black text-blue-300 uppercase tracking-widest">
-                  OPERATOR WORKFLOW
-                </span>
-                <h3 className="text-xl sm:text-2xl font-black mt-1">
-                  LOGIN → RECEIVE → DOWNLOAD → PRINT
-                </h3>
-                <p className="text-xs text-blue-100/80 mt-2 max-w-xl">
-                  Dokumen dari customer masuk otomatis ke antrian di bawah. Anda cukup klik tombol
-                  "Download" untuk membuka file di PC cetak toko, lalu cetak sesuai instruksi.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-3 shrink-0">
-                <button
-                  onClick={() => setActiveTab('requests')}
-                  className="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-xs font-black rounded-xl transition-all shadow-md active:scale-95"
-                >
-                  Buka Antrian Print
-                </button>
-                <button
-                  onClick={onNavigateToUpload}
-                  className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs font-bold rounded-xl transition-colors"
-                >
-                  Upload Manual
-                </button>
-              </div>
-            </div>
-
             {/* Recent Pending Requests Preview */}
             <div className="bg-white rounded-2xl border border-neutral-200 p-6">
               <div className="flex items-center justify-between mb-4">
