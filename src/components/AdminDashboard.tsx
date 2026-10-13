@@ -28,8 +28,7 @@ import {
 import { PrintRequest, StoreSettings, RequestStatus } from '../types';
 import { BrandingLockup } from './BrandingLockup';
 import { formatRupiah } from '../lib/pricing';
-import { saveStoreSettings } from '../lib/db';
-import { getAdminRequests, setAdminRequestStatus, getAdminDownloadUrl } from '../lib/supabaseApi';
+import { getAdminRequests, setAdminRequestStatus, getAdminDownloadUrl, saveAdminStoreSettings } from '../lib/supabaseApi';
 import { RequestDetailModal } from './RequestDetailModal';
 import { QRDisplayView } from './QRDisplayView';
 import { PrintTicketModal } from './PrintTicketModal';
@@ -150,10 +149,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
-    await saveStoreSettings(editableSettings);
-    onSettingsUpdated(editableSettings);
-    setSettingsSavedMessage(true);
-    setTimeout(() => setSettingsSavedMessage(false), 3000);
+    try {
+      await saveAdminStoreSettings(editableSettings);
+      const nextSettings = { ...editableSettings, operatorPin: settings.operatorPin };
+      onSettingsUpdated(nextSettings);
+      setEditableSettings(nextSettings);
+      setSettingsSavedMessage(true);
+      setTimeout(() => setSettingsSavedMessage(false), 3000);
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : 'Gagal menyimpan pengaturan ke database.');
+    }
   };
 
   const getStatusBadge = (status: RequestStatus) => {
@@ -767,16 +772,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-neutral-700 mb-1">
-                      PIN Keamanan Operator (4 Digit)
+                      PIN Operator
                     </label>
                     <input
                       type="text"
-                      maxLength={6}
-                      value={editableSettings.operatorPin}
-                      onChange={(e) =>
-                        setEditableSettings({ ...editableSettings, operatorPin: e.target.value })
-                      }
-                      className="w-full px-3 py-2 text-xs font-mono bg-white border border-neutral-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-neutral-900"
+                      value="Dikelola melalui Supabase Secrets"
+                      disabled
+                      className="w-full px-3 py-2 text-xs bg-neutral-100 border border-neutral-300 rounded-lg text-neutral-500"
                     />
                   </div>
 
