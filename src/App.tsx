@@ -14,6 +14,7 @@ import {
   subscribeToSync,
 } from './lib/db';
 import { playNotificationChime } from './lib/audio';
+import { clearAdminToken, getAdminToken } from './lib/supabaseApi';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<'customer' | 'admin'>('customer');
@@ -21,7 +22,7 @@ export default function App() {
   const [showTrackerModal, setShowTrackerModal] = useState(false);
   const [showAdminPinModal, setShowAdminPinModal] = useState(false);
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
-    return sessionStorage.getItem('after_project_admin_auth') === 'true';
+    return sessionStorage.getItem('after_project_admin_auth') === 'true' && Boolean(getAdminToken());
   });
   const [activeReceipt, setActiveReceipt] = useState<PrintRequest | null>(null);
   const [pendingCount, setPendingCount] = useState<number>(0);
@@ -88,6 +89,7 @@ export default function App() {
   const handleAdminLogout = () => {
     setIsAdminAuthenticated(false);
     sessionStorage.removeItem('after_project_admin_auth');
+    clearAdminToken();
     handleSwitchView('customer');
   };
 
@@ -199,7 +201,6 @@ export default function App() {
       {/* PIN Access Modal for Owner/Operator */}
       {showAdminPinModal && (
         <AdminLoginModal
-          correctPin={settings.operatorPin}
           onSuccess={handlePinSuccess}
           onClose={() => setShowAdminPinModal(false)}
         />
